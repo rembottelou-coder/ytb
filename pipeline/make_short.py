@@ -10,6 +10,16 @@ P = os.path.join(ROOT, "pipeline")
 os.chdir(P)
 
 existing = sorted(glob.glob(os.path.join(ROOT, "shorts", "s*.mp4")))
+# If a Short is already rendered but not yet posted, use it (buffer) instead of rendering.
+try:
+    posted = {p["name"] for p in json.load(open(os.path.join(ROOT, "shorts", "posted.json")))}
+except Exception:
+    posted = set()
+for mp4 in existing:
+    n = os.path.basename(mp4)[:-4]
+    if n not in posted and os.path.exists(mp4[:-4] + ".json") and not os.environ.get("IDX"):
+        print("READY", n, json.load(open(mp4[:-4] + ".json"))["title"], "(already rendered)")
+        sys.exit(0)
 idx = int(os.environ.get("IDX", len(existing) + 1))
 name = "s%02d" % idx
 rng = random.Random(idx * 7919)

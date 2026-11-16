@@ -34,7 +34,7 @@ git add shorts/sNN.mp4 shorts/sNN.json && git commit -m "Add short sNN" && git -
    `el.focus(); document.execCommand('selectAll'); document.execCommand('insertText', false, TEXT)`.
    Verify with `.innerText`.
 4. Audience: click the radio "Non, elle n'est pas conçue pour les enfants"
-   (`tp-yt-paper-radio-button[name="VIDEO_MADE_FOR_KIDS_NOT_MFK"]`).
+   (`find` it by that text and click it, or in JS: the `tp-yt-paper-radio-button` whose innerText contains "pas conçue").
 5. Click `#next-button` three times (2 s apart), then `tp-yt-paper-radio-button[name="PUBLIC"]`, then `#done-button`.
 6. Read the share link from the dialog (`[...document.querySelectorAll('a')].map(a=>a.href).find(h=>h.includes('youtube.com/shorts'))`), close it.
 7. Append `{name, url, date}` to `shorts/posted.json`, commit, push.
