@@ -35,6 +35,14 @@ git add shorts/sNN.mp4 shorts/sNN.json && git commit -m "Add short sNN" && git -
    Verify with `.innerText`.
 4. Audience: click the radio "Non, elle n'est pas conçue pour les enfants"
    (`find` it by that text and click it, or in JS: the `tp-yt-paper-radio-button` whose innerText contains "pas conçue").
-5. Click `#next-button` three times (2 s apart), then `tp-yt-paper-radio-button[name="PUBLIC"]`, then `#done-button`.
+5. Click `#next-button` three times (2 s apart). On the Visibility step, SCHEDULE for 18:00 (Paris) the same day:
+   - click the "Programmer" section header (find "Programmer") to expand it;
+   - date: `document.querySelector('ytcp-uploads-dialog #datepicker-trigger').click()`, then focus
+     `ytcp-date-picker input`, select it, `execCommand('insertText', false, '<D> <mois abrégé>. <YYYY>')`
+     (format shown, e.g. "17 nov. 2026"), then press Return with the browser `computer` key tool (a JS keydown is ignored);
+     check `#datepicker-trigger` innerText shows the new date;
+   - time: focus `ytcp-uploads-dialog #time-of-day-container input`, select, insertText "18:00", press Return (computer key);
+   - click `#done-button` (label "Programmer"). The dialog then says "Vidéo programmée ... à 18:00".
+   If it's already past 17:50 when you reach this step, publish immediately instead (radio `name="PUBLIC"`, then `#done-button`).
 6. Read the share link from the dialog (`[...document.querySelectorAll('a')].map(a=>a.href).find(h=>h.includes('youtube.com/shorts'))`), close it.
-7. Append `{name, url, date}` to `shorts/posted.json`, commit, push.
+7. Append `{name, url, date, scheduled}` to `shorts/posted.json`, commit, push.

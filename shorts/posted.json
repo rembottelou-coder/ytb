@@ -1,1 +1,13 @@
-[{"name":"s01","url":"https://youtube.com/shorts/NJjydP5Ra_Q","date":"2026-11-16"}]
+[
+ {
+  "name": "s01",
+  "url": "https://youtube.com/shorts/NJjydP5Ra_Q",
+  "date": "2026-11-16"
+ },
+ {
+  "name": "s02",
+  "url": "https://youtube.com/shorts/GuMeqkYGYWw",
+  "date": "2026-11-16",
+  "scheduled": "18:00"
+ }
+]
