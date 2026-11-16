@@ -28,7 +28,7 @@ if not os.environ.get("IDX"):
 idx = int(os.environ.get("IDX", len(existing) + 1))
 name = "s%02d" % idx
 rng = random.Random(idx * 7919)
-concept = os.environ.get("CONCEPT") or ("soft" if idx % 2 == 0 else "fit")
+concept = os.environ.get("CONCEPT") or ("soft" if idx % 2 == 1 else "fit")
 
 if concept == "fit":
     pal = ["oak", "walnut", "maple", "cherry"][idx % 4]
