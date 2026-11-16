@@ -118,7 +118,7 @@ floor.data.materials.append(fm)
 
 # ball
 R = 0.62
-bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4 if soft > 0 else 5, radius=R, location=(0.06 + random.uniform(-0.03, 0.03), 0.02, top + 2.9))
+bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4 if soft > 0 else 5, radius=R, location=(0.03 + random.uniform(-0.015, 0.015), 0.01, top + 2.9))
 ball = bpy.context.active_object; smooth(ball); ball.data.materials.append(M_BALL)
 
 if soft == 0:
@@ -147,13 +147,13 @@ else:
     s.quality = 8
     s.mass = 0.3
     s.air_damping = 1.0
-    s.tension_stiffness = 60 * (1 - k) + 3
-    s.compression_stiffness = 60 * (1 - k) + 3
-    s.shear_stiffness = 20 * (1 - k) + 2
-    s.bending_stiffness = 8 * (1 - k) ** 2 + 0.05
+    s.tension_stiffness = 60 * (1 - k) ** 2 + 1.0
+    s.compression_stiffness = 60 * (1 - k) ** 2 + 1.0
+    s.shear_stiffness = 20 * (1 - k) ** 2 + 0.5
+    s.bending_stiffness = 8 * (1 - k) ** 2 + 0.02
     s.tension_damping = 5; s.compression_damping = 5; s.bending_damping = 0.5
     s.use_pressure = True
-    s.uniform_pressure_force = 14 * (1 - k) + 2.5
+    s.uniform_pressure_force = 14 * (1 - k) ** 2 + 0.5
     s.pressure_factor = 1.0
     s.fluid_density = 0
     s.use_internal_springs = False
@@ -169,7 +169,7 @@ else:
     for o in obst + [ped, floor]:
         cm = o.modifiers.new("col", "COLLISION")
         o.collision.thickness_outer = 0.015
-        o.collision.cloth_friction = 6 if o in obst else 4
+        o.collision.cloth_friction = 12 if o in obst else 5
         o.collision.damping = 0.3
     sub = ball.modifiers.new("sub", "SUBSURF"); sub.levels = 1; sub.render_levels = 1
 
