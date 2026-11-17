@@ -3,6 +3,13 @@
 Channel: **SatisFit 3D** (@SatisFit3D), YouTube Studio channel id `UCFs5CBPK9XgrcTTJwGlugGQ`,
 signed in inside the Claude desktop app's built-in browser (account of the channel owner).
 
+## Concepts
+`make_short.py` picks a concept that none of the last 4 Shorts used (force with `CONCEPT=`):
+fit, soft (3-clip "Angle" / "% SOFT" formats) and single-clip scenes `c_nest.py`, `c_dice.py`,
+`c_shapes.py`, `c_domino.py`, `c_cloth.py`, `c_galton.py` (helpers in `common.py`, sounds in `sfx.py`,
+composited by `compose_generic.py` with SFX synced to `events.json`). Quick preview of any scene:
+`STEP=30 python3 pipeline/c_dice.py /tmp/x 1 0.2 4` renders every 30th frame at low quality.
+
 ## 1. Render the next Short (cloud workspace)
 
 ```bash

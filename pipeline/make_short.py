@@ -3,8 +3,15 @@ Usage (from repo root):  python3 pipeline/make_short.py
 Outputs: shorts/sNN.mp4 and shorts/sNN.json (title, description, concept)
 If a rendered Short exists that is not in shorts/posted.json, it is reused (prints READY at once).
 Rendering takes ~30-45 min on 2 CPUs; run it in the background and poll.
-Concepts alternate: "fit" (sliced wooden sphere / slotted block, Angle X°)
-                    "soft" (0% / 50% / 100% SOFT ball on a gold obstacle, marble pedestal)
+Concepts (picked so that none of the last 4 Shorts' concepts repeats; force one with CONCEPT=...):
+  fit     sliced wooden sphere / slotted block, "Angle X°" (3 clips)
+  soft    0% / 50% / 100% SOFT ball on a gold obstacle (3 clips)
+  nest    hollow squares / hexagons / circles dropping into each other, tops flush
+  dice    colourful dice tumbling into a grid tray
+  shapes  shape-sorter block, every piece slides into its hole
+  domino  rainbow domino spiral / wave chain reaction
+  cloth   gold / silver / silk cloth draping over an object in slow motion
+  galton  bell-curve machine (balls through pegs into bins)
 """
 import os, sys, json, random, subprocess, glob, shutil
 
@@ -13,7 +20,7 @@ P = os.path.join(ROOT, "pipeline")
 os.chdir(P)
 os.makedirs(os.path.join(ROOT, "shorts"), exist_ok=True)
 
-existing = sorted(glob.glob(os.path.join(ROOT, "shorts", "s*.mp4")))
+existing = sorted(glob.glob(os.path.join(ROOT, "shorts", "s*.mp4")), key=lambda q: int(os.path.basename(q)[1:-4]))
 try:
     posted = {p["name"] for p in json.load(open(os.path.join(ROOT, "shorts", "posted.json")))}
 except Exception:
@@ -28,7 +35,19 @@ if not os.environ.get("IDX"):
 idx = int(os.environ.get("IDX", len(existing) + 1))
 name = "s%02d" % idx
 rng = random.Random(idx * 7919)
-concept = os.environ.get("CONCEPT") or ("soft" if idx % 2 == 1 else "fit")
+ALL = ["fit", "soft", "nest", "dice", "shapes", "domino", "cloth", "galton"]
+WEIGHTS = {"fit": 1, "soft": 1, "nest": 1.2, "dice": 1.2, "shapes": 1.1, "domino": 1.1, "cloth": 1, "galton": 1}
+hist = []
+for j in sorted(glob.glob(os.path.join(ROOT, "shorts", "s*.json")), key=lambda q: int(os.path.basename(q)[1:-5]))[-4:]:
+    try:
+        hist.append(json.load(open(j)).get("concept"))
+    except Exception:
+        pass
+concept = os.environ.get("CONCEPT")
+if not concept:
+    cands = [c for c in ALL if c not in hist] or ALL
+    concept = rng.choices(cands, weights=[WEIGHTS[c] for c in cands])[0]
+print("concept", concept, "history", hist, flush=True)
 
 if concept == "fit":
     pal = ["oak", "walnut", "maple", "cherry"][idx % 4]
@@ -48,7 +67,7 @@ if concept == "fit":
     desc = (f"{a1}°? Crash. {a2}°? Still no. 0°... PERFECT FIT ✅\n"
             f"A sliced {wood} sphere ({nslab} slices) dropped into a slotted block — 3D physics simulation.\n\n")
     meta = {"palette": pal, "angles": angles, "nslab": nslab}
-else:
+elif concept == "soft":
     obst = rng.choice(["cone", "cone", "pipe", "spikes"])
     ball = rng.choice(["marble", "marble", "gold", "pink", "mint", "silver"])
     seed = rng.randint(1, 999)
@@ -63,6 +82,49 @@ else:
         f"Hard vs Soft ball on a {obst}… wait for 100% 🫠 #shorts"])
     desc = (f"0% SOFT, 50% SOFT, 100% SOFT — a {ball} ball dropped on a gold {obst}. Soft body 3D physics simulation.\n\n")
     meta = {"obstacle": obst, "ball": ball}
+
+else:
+    seed = rng.randint(1, 999)
+    sd = os.path.join(P, "shorts", name)
+    os.makedirs(sd, exist_ok=True)
+    subprocess.run(["python3", f"c_{concept}.py", sd, str(seed), os.environ.get("RES", "0.4"), os.environ.get("SAMPLES", "10")], check=True)
+    meta = json.load(open(os.path.join(sd, "events.json")))["meta"]
+    subprocess.run(["python3", "compose_generic.py", sd], check=True)
+    if concept == "nest":
+        what = {4: "Squares", 6: "Hexagons", 64: "Circles"}[meta["shape"]]
+        title = rng.choice([f"{what} inside {what.lower()}… perfect fit 😮‍💨 #satisfying #shorts",
+                            f"{meta['n']} {what.lower()}, ONE perfect stack 🌈 #satisfying #shorts",
+                            f"Wait for the smallest one 🤏 #satisfying #perfectfit #shorts"])
+        desc = f"{meta['n']} hollow {what.lower()} drop into each other and end perfectly flush. 3D animation.\n\n"
+    elif concept == "dice":
+        title = {"six": "Every dice lands on SIX 🎲 #satisfying #shorts",
+                 "count": "1, 2, 3, 4, 5, 6… perfectly in order 🎲 #satisfying #shorts",
+                 "random": rng.choice(["Dice fitting perfectly into the tray 🎲 #satisfying #shorts",
+                                       "So satisfying: every dice finds its slot 🎲 #shorts"])}[meta["faces"]]
+        desc = f"{meta['grid']}x{meta['grid']} colourful dice tumbling into a tray, one perfect fit after another. 3D animation.\n\n"
+    elif concept == "shapes":
+        title = rng.choice(["Every shape finds its hole ⭐❤️🔺 #satisfying #shorts",
+                            "The most satisfying shape sorter 🧩 #satisfying #shorts",
+                            "Star, heart, hexagon… all PERFECT FIT ✅ #shorts"])
+        desc = "Square, circle, triangle, star, hexagon and heart pieces sliding into their holes. 3D animation.\n\n"
+    elif concept == "domino":
+        title = rng.choice([f"{meta['n']} rainbow dominoes 🌈 wait for it… #satisfying #shorts",
+                            "Rainbow domino chain reaction 🌈 #satisfying #dominoes #shorts",
+                            "The most satisfying domino spiral 🌀 #shorts"])
+        desc = f"{meta['n']} rainbow dominoes in a {meta['path']} — 3D physics chain reaction.\n\n"
+    elif concept == "cloth":
+        cl = {"gold": "Gold", "silver": "Silver", "silk": "Silk"}[meta["cloth"]]
+        title = rng.choice([f"{cl} cloth vs {meta['obj']} ✨ #satisfying #clothsimulation #shorts",
+                            f"Slow-motion {cl.lower()} cloth wrapping a {meta['obj']} 😍 #satisfying #shorts",
+                            f"So smooth… {cl.lower()} cloth simulation ✨ #shorts"])
+        desc = f"A {cl.lower()} cloth falls in slow motion and wraps a glossy {meta['obj']}. 3D cloth simulation.\n\n"
+    else:  # galton
+        title = rng.choice(["The bell curve machine never fails 🎯 #satisfying #physics #shorts",
+                            f"{meta['balls']} balls, one perfect bell curve 📈 #satisfying #shorts",
+                            "Galton board: watch the curve appear 🤯 #shorts"])
+        desc = f"{meta['balls']} balls bounce through a peg board and stack into a bell curve. 3D animation.\n\n"
+    meta = {k: v for k, v in meta.items() if k not in ("caption",)}
+    meta.pop("concept", None)
 
 desc += "Subscribe to @SatisFit3D for more satisfying 3D simulations!\n#satisfying #oddlysatisfying #3danimation #physics #asmr #shorts"
 shutil.copy(os.path.join(sd, "final.mp4"), os.path.join(ROOT, "shorts", name + ".mp4"))
