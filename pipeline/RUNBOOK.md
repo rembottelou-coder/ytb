@@ -44,5 +44,10 @@ git add shorts/sNN.mp4 shorts/sNN.json && git commit -m "Add short sNN" && git -
    - time: focus `ytcp-uploads-dialog #time-of-day-container input`, select, insertText "18:00", press Return (computer key);
    - click `#done-button` (label "Programmer"). The dialog then says "Vidéo programmée ... à 18:00".
    If it's already past 17:50 when you reach this step, publish immediately instead (radio `name="PUBLIC"`, then `#done-button`).
+   **If the browser pane is hidden** (`document.hasFocus()` false), `execCommand`/typed keys do nothing. What works then:
+   - title/description: `find` "Ajoutez un titre" / "Présentez votre vidéo" and use `form_input` on those refs (verify `.innerText`);
+   - schedule: `find` "Programmer" and click that ref (the JS `#visibility-title` click doesn't expand it); click `#datepicker-trigger`,
+     screenshot, click the day number in the calendar; click the time input (opens a list of 15-min slots), `scroll_to` the
+     `find "18:00"` option ref, take a NEW screenshot and click the option by coordinate; verify the fields show the right values.
 6. Read the share link from the dialog (`[...document.querySelectorAll('a')].map(a=>a.href).find(h=>h.includes('youtube.com/shorts'))`), close it.
 7. Append `{name, url, date, scheduled}` to `shorts/posted.json`, commit, push.
