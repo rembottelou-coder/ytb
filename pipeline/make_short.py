@@ -3,7 +3,7 @@ Usage (from repo root):  python3 pipeline/make_short.py
 Outputs: shorts/sNN.mp4 and shorts/sNN.json (title, description, concept)
 If a rendered Short exists that is not in shorts/posted.json, it is reused (prints READY at once).
 Rendering takes ~30-45 min on 2 CPUs; run it in the background and poll.
-Concepts (picked so that none of the last 4 Shorts' concepts repeats; force one with CONCEPT=...):
+Concepts (picked so that none of the last 6 Shorts' concepts repeats (= the last 2 days); force one with CONCEPT=...):
   fit     sliced wooden sphere / slotted block, "Angle X°" (3 clips)
   soft    0% / 50% / 100% SOFT ball on a gold obstacle (3 clips)
   nest    hollow squares / hexagons / circles dropping into each other, tops flush
@@ -38,7 +38,7 @@ rng = random.Random(idx * 7919)
 ALL = ["fit", "soft", "nest", "dice", "shapes", "domino", "cloth", "galton"]
 WEIGHTS = {"fit": 1, "soft": 1, "nest": 1.2, "dice": 1.2, "shapes": 1.1, "domino": 1.1, "cloth": 1, "galton": 1}
 hist = []
-for j in sorted(glob.glob(os.path.join(ROOT, "shorts", "s*.json")), key=lambda q: int(os.path.basename(q)[1:-5]))[-4:]:
+for j in sorted(glob.glob(os.path.join(ROOT, "shorts", "s*.json")), key=lambda q: int(os.path.basename(q)[1:-5]))[-6:]:
     try:
         hist.append(json.load(open(j)).get("concept"))
     except Exception:
