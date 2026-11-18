@@ -1,0 +1,21 @@
+{
+ "name": "s06",
+ "concept": "galton",
+ "title": "Galton board: watch the curve appear 🤯 #shorts",
+ "description": "150 balls bounce through a peg board and stack into a bell curve. 3D animation.\n\nSubscribe to @SatisFit3D for more satisfying 3D simulations!\n#satisfying #oddlysatisfying #3danimation #physics #asmr #shorts",
+ "bg": "mint",
+ "balls": 150,
+ "bins": [
+  0,
+  4,
+  6,
+  31,
+  21,
+  31,
+  35,
+  15,
+  4,
+  3,
+  0
+ ]
+}
