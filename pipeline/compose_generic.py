@@ -15,6 +15,11 @@ caption = sys.argv[2] if len(sys.argv) > 2 else ev.get("meta", {}).get("caption"
 W, H, FPS, SR = 1080, 1920, 30, sfx.SR
 FONT = "/usr/share/fonts/truetype/google-fonts/Poppins-Bold.ttf"
 font = ImageFont.truetype(FONT, 88)
+# shrink long captions so they keep a safe margin on each side (Shorts UI crops the edges)
+_fs = 88
+while _fs > 48 and ImageDraw.Draw(Image.new("RGB", (8, 8))).textlength(caption, font=font) > W - 160:
+    _fs -= 4
+    font = ImageFont.truetype(FONT, _fs)
 sfx.seed(len(caption) + ev["nframes"])
 
 frames = sorted(glob.glob(os.path.join(cd, "f_*.jpg")))
