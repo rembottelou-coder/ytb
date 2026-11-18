@@ -123,5 +123,44 @@ def pad(n, root=261.63):
     return s * 0.022
 
 
+def pop(mag=1.0, pitch=1.0):           # bubbly "pop" (fast downward pitch blip) - very ASMR
+    t = _t(0.16)
+    f = (900 * pitch) * np.exp(-t * 28) + 260 * pitch
+    s = np.sin(2 * np.pi * np.cumsum(f) / SR) * _env(t, 30) * np.minimum(1, t / 0.0015)
+    s += _rng.normal(0, 1, len(t)) * _env(t, 900) * 0.25
+    return s * 0.7 * mag
+
+
+def sparkle(mag=1.0, pitch=1.0, length=1.2):   # glittery shimmer: many tiny high bell partials
+    n = int(SR * length); s = np.zeros(n)
+    for _ in range(26):
+        st = int(_rng.uniform(0, 0.75) * n)
+        f = _rng.choice([2093, 2349, 2637, 3136, 3520, 4186, 4699]) * pitch
+        t = _t(0.35); g = np.sin(2 * np.pi * f * t) * _env(t, 14) * _rng.uniform(0.3, 1)
+        j = min(n, st + len(g)); s[st:j] += g[: j - st]
+    return s * np.linspace(1, 0.4, n) * 0.18 * mag
+
+
+def chord(mag=1.0, pitch=1.0):         # big final "done" chord: ding + bell + sparkle
+    t = _t(2.4); s = np.zeros_like(t)
+    for f, a, d in [(523.25, .45, 1.6), (659.25, .35, 1.8), (783.99, .35, 2.0), (1046.5, .4, 2.4),
+                    (1568, .25, 3.0), (2093, .15, 3.8)]:
+        s += a * np.sin(2 * np.pi * f * pitch * t) * _env(t, d) * (1 + 0.004 * np.sin(2 * np.pi * 5 * t))
+    s *= np.minimum(1, t / 0.006)
+    sp = sparkle(0.9, pitch, 1.6); s[: len(sp)] += sp
+    return s * 0.42 * mag
+
+
+def reverb(x, wet=0.22, length=1.4, damp=3.2, seed_=11):
+    """Cheap stereo-able reverb: convolve with exponentially decaying filtered noise."""
+    r = np.random.default_rng(seed_)
+    n = int(SR * length); ir = r.normal(0, 1, n) * np.exp(-damp * np.arange(n) / SR)
+    ir = np.convolve(ir, np.ones(6) / 6, mode="same")          # soften highs
+    ir /= np.sqrt((ir ** 2).sum()) + 1e-9
+    L = len(x) + n - 1; N = 1 << (L - 1).bit_length()
+    y = np.fft.irfft(np.fft.rfft(x, N) * np.fft.rfft(ir, N), N)[: len(x)]
+    return x + wet * y * (np.abs(x).max() / (np.abs(y).max() + 1e-9))
+
+
 SOUNDS = {"knock": knock, "thock": thock, "clack": clack, "click": click, "clink": clink, "thud": thud,
-          "squish": squish, "ding": ding}
+          "squish": squish, "ding": ding, "pop": pop, "chord": chord}

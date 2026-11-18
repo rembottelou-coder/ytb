@@ -14,7 +14,7 @@ spp = int(sys.argv[4]) if len(sys.argv) > 4 else 10
 random.seed(seed)
 SEG = int(os.environ.get("SHAPE", random.choice([4, 4, 6, 64])))
 N = int(os.environ.get("N", random.choice([5, 6, 7])))
-BG = os.environ.get("BG", random.choice(list(PASTELS)))
+BG = os.environ.get("BG", pick_bg())
 
 LEAD = 15
 STEP = 30         # frames between drops
@@ -81,7 +81,7 @@ for i, (ob, apo, h) in enumerate(boxes):
     set_interp(ob, "LINEAR")
     events.append([fl, "whoosh_short", 0.5])
     events.append([land, "thock", 0.5 + 0.5 * i / N, i])   # 4th field = pitch step
-events.append([events[-1][0] + 4, "ding", 1.0])
+events.append([events[-1][0] + 4, "chord", 1.0])
 
 cam_h = 7.6
 camera((3.7, -5.6, 6.6), (0, 0, 0.75), lens=44)

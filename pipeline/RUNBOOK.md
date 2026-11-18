@@ -10,6 +10,18 @@ fit, soft (3-clip "Angle" / "% SOFT" formats) and single-clip scenes `c_nest.py`
 composited by `compose_generic.py` with SFX synced to `events.json`). Quick preview of any scene:
 `STEP=30 python3 pipeline/c_dice.py /tmp/x 1 0.2 4` renders every 30th frame at low quality.
 
+## User feedback (keep applying every day)
+- 17/11: "à chaque fois ce sont toujours les mêmes vidéos, varie vraiment" → 3 different concepts per day, none from the previous 6 Shorts, titles never repeated.
+- 18/11: "plus de couleurs, insister sur les bruitages satisfaisants, des trucs qui changent de ceux d'aujourd'hui, le but c'est vraiment *satisfaisant*, que ça stimule la tête".
+  What the pipeline now does for this (concept scenes `c_*.py` + `compose_generic.py`):
+  - colours: saturated candy `RAINBOW` (10 hues), vivid backdrops (`VIVID` / `pick_bg()`), "Standard" view transform
+    with -0.5 exposure (AgX was washing colours to pastel), +18 % saturation in compositing (`SAT=`), rainbow-gradient cloth;
+  - sound: stereo mix with per-event panning + light reverb + soft-clip (louder, headphone ASMR feel); new sounds
+    `pop`, `sparkle`, `chord` (big final chord); every landing gets a rising pluck melody; finales are `chord` + `sparkle`;
+  - motion: slow camera push-in over the clip (`PUSH=1.06`).
+  When checking frames, reject a Short that looks pale/pastel or whose sound is only a few weak clicks.
+  (fit / soft still use the older `scene.py` / `compose.py` look — upgrade them the same way before using them again.)
+
 ## 1. Render the next Short (cloud workspace)
 
 ```bash

@@ -1,11 +1,12 @@
 """Compose a single-clip concept short: frames + events.json -> final.mp4 with synced SFX.
 python3 compose_generic.py <clip_dir> [caption]
 events.json: {"events": [[frame, kind, mag, (opt) pitch_step], ...], "nframes":.., "meta": {"caption":..}}
-kinds: knock thock clack click clink thud squish ding whoosh whoosh_short swish pluck
+kinds: knock thock clack click clink thud squish ding whoosh whoosh_short swish pluck pop sparkle chord
+event = [frame, kind, mag, (opt) step, (opt) pan -1..1]; output is stereo with reverb
 """
 import sys, os, json, glob, subprocess, wave
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx
 
@@ -29,6 +30,7 @@ for f in glob.glob(os.path.join(comp, "*.jpg")):
 for i, fp in enumerate(frames):
     im = Image.open(fp).convert("RGB").resize((W, H), Image.LANCZOS)
     im = im.filter(ImageFilter.UnsharpMask(radius=2, percent=50, threshold=2))
+    im = ImageEnhance.Color(im).enhance(float(os.environ.get("SAT", 1.18)))      # extra colour pop
     if caption:
         d = ImageDraw.Draw(im)
         tw = d.textlength(caption, font=font)
@@ -37,9 +39,11 @@ for i, fp in enumerate(frames):
 
 n = len(frames)
 dur = n / FPS
-buf = np.zeros(int(SR * (dur + 1)))
-buf += sfx.pad(len(buf), root=float(ev.get("meta", {}).get("root", 261.63)))
+buf = np.zeros((2, int(SR * (dur + 1))))          # stereo: headphone-friendly ASMR panning
+pad = sfx.pad(buf.shape[1], root=float(ev.get("meta", {}).get("root", 261.63)))
+buf[0] += pad; buf[1] += pad
 counts = {}
+prng = np.random.default_rng(len(ev["events"]) * 31 + ev["nframes"])
 for e in ev["events"]:
     f, kind, mag = e[0], e[1], float(e[2])
     step = e[3] if len(e) > 3 else None
@@ -53,18 +57,25 @@ for e in ev["events"]:
         s = sfx.whoosh(mag * 0.6, 0.3)
     elif kind == "swish":
         s = sfx.swish(mag)
+    elif kind == "sparkle":
+        s = sfx.sparkle(mag)
     elif kind == "pluck":
         s = sfx.pluck(mag, int(step or 0))
     else:
         pitch = 1.0 if step is None else 2 ** (int(step) * 2 / 12)   # rising whole tones per step
         s = sfx.SOUNDS[kind](mag, pitch)
-    i0 = int(t * SR); j = min(len(buf), i0 + len(s)); buf[i0:j] += s[: j - i0]
-buf = buf[: int(SR * dur)]
-buf = buf / (np.abs(buf).max() + 1e-9) * 0.85
-fo = int(SR * 0.3); buf[-fo:] *= np.linspace(1, 0, fo)
+    # pan: explicit 5th field in [-1,1], else gentle random; final chord / pads stay centred
+    pan = float(e[4]) if len(e) > 4 else (0.0 if kind in ("chord", "ding", "whoosh", "swish") else prng.uniform(-0.55, 0.55))
+    gl, gr = np.sqrt((1 - pan) / 2) * 1.414, np.sqrt((1 + pan) / 2) * 1.414
+    i0 = int(t * SR); j = min(buf.shape[1], i0 + len(s))
+    buf[0, i0:j] += gl * s[: j - i0]; buf[1, i0:j] += gr * s[: j - i0]
+buf[0] = sfx.reverb(buf[0], seed_=11); buf[1] = sfx.reverb(buf[1], seed_=12)
+buf = buf[:, : int(SR * dur)]
+buf = np.tanh(1.6 * buf / (np.abs(buf).max() + 1e-9)) / np.tanh(1.6) * 0.9   # soft-clip: louder, punchier
+fo = int(SR * 0.3); buf[:, -fo:] *= np.linspace(1, 0, fo)
 with wave.open(os.path.join(cd, "audio.wav"), "wb") as w:
-    w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
-    w.writeframes((buf * 32767).astype(np.int16).tobytes())
+    w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
+    w.writeframes((buf.T * 32767).astype(np.int16).tobytes())
 out = os.path.join(cd, "final.mp4")
 subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-framerate", str(FPS), "-i", os.path.join(comp, "c_%05d.jpg"),
                 "-i", os.path.join(cd, "audio.wav"), "-c:v", "libx264", "-preset", "medium", "-crf", "20",

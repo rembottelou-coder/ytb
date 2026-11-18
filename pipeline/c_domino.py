@@ -13,7 +13,7 @@ res = float(sys.argv[3]) if len(sys.argv) > 3 else 0.4
 spp = int(sys.argv[4]) if len(sys.argv) > 4 else 10
 random.seed(seed)
 SHAPE = os.environ.get("PATHSHAPE", random.choice(["spiral", "spiral", "wave"]))
-BG = os.environ.get("BG", random.choice(list(PASTELS)))
+BG = os.environ.get("BG", pick_bg())
 LEAD = 15
 scn = reset(400, seed)
 studio(BG)
@@ -111,7 +111,7 @@ for i, f in enumerate(fell):
         if i % 6 == 0:
             events.append([f, "pluck", 0.45, i // 6])
 last = max(done) if done else nframes - 30
-events.append([last + 4, "ding", 0.9])
+events.append([last + 4, "chord", 0.9])
 print("fallen", len(done), "of", N, "last", last)
 
 camera((0.0, -3.4, 9.0), (0, 0.05, 0.0), lens=44)

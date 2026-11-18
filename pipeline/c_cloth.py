@@ -1,5 +1,5 @@
 """Concept "cloth": a silky / metallic cloth falls in slow motion and wraps a glossy object on a pedestal.
-python3 c_cloth.py <out_dir> [seed] [res] [samples]   env: OBJ=sphere|cube|torus|cone  CLOTH=gold|silver|silk  BG
+python3 c_cloth.py <out_dir> [seed] [res] [samples]   env: OBJ=sphere|cube|torus|cone  CLOTH=rainbow|silk|gold|silver  BG
 """
 import sys, os, math, random
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -12,8 +12,8 @@ res = float(sys.argv[3]) if len(sys.argv) > 3 else 0.4
 spp = int(sys.argv[4]) if len(sys.argv) > 4 else 10
 random.seed(seed)
 OBJ = os.environ.get("OBJ", random.choice(["sphere", "sphere", "cube", "torus", "cone"]))
-CL = os.environ.get("CLOTH", random.choice(["gold", "silver", "silk"]))
-BG = os.environ.get("BG", random.choice(list(PASTELS)))
+CL = os.environ.get("CLOTH", random.choice(["rainbow", "rainbow", "rainbow", "silk", "silk", "gold"]))
+BG = os.environ.get("BG", pick_bg())
 LEAD = 12
 nframes = 225
 scn = reset(nframes, seed)
@@ -71,12 +71,29 @@ elif CL == "silver":
     mc = metal("clothm", (0.92, 0.92, 0.95), 0.18)
 else:
     mc = bpy.data.materials.new("silk"); mc.use_nodes = True
-    b = mc.node_tree.nodes["Principled BSDF"]
-    sc = random.choice([(0.55, 0.05, 0.12), (0.06, 0.16, 0.45), (0.03, 0.36, 0.26), (0.36, 0.10, 0.50), (0.70, 0.30, 0.02)])
-    b.inputs["Base Color"].default_value = (*srgb_to_lin(sc), 1)
-    b.inputs["Roughness"].default_value = 0.35
+    nt = mc.node_tree; b = nt.nodes["Principled BSDF"]
+    if CL == "rainbow":
+        # vivid rainbow gradient across the cloth (UV based), slightly diagonal
+        tc = nt.nodes.new("ShaderNodeTexCoord"); sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+        mix = nt.nodes.new("ShaderNodeMath"); mix.operation = "MULTIPLY_ADD"; mix.inputs[1].default_value = 0.35
+        ramp = nt.nodes.new("ShaderNodeValToRGB")
+        cols = RAINBOW[:] if random.random() < 0.5 else RAINBOW[::-1]
+        el = ramp.color_ramp.elements
+        while len(el) < len(cols):
+            el.new(0.5)
+        for i, c in enumerate(cols):
+            el[i].position = i / (len(cols) - 1) * 0.74
+            el[i].color = (*srgb_to_lin(c), 1)
+        nt.links.new(tc.outputs["UV"], sep.inputs[0])
+        nt.links.new(sep.outputs["X"], mix.inputs[0]); nt.links.new(sep.outputs["Y"], mix.inputs[2])
+        nt.links.new(mix.outputs[0], ramp.inputs["Fac"]); nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
+        b.inputs["Roughness"].default_value = 0.3
+    else:
+        sc = random.choice([(1.0, 0.12, 0.40), (0.10, 0.45, 1.0), (0.05, 0.80, 0.50), (0.60, 0.20, 1.0), (1.0, 0.45, 0.05)])
+        b.inputs["Base Color"].default_value = (*srgb_to_lin(sc), 1)
+        b.inputs["Roughness"].default_value = 0.35
     if "Sheen Weight" in b.inputs:
-        b.inputs["Sheen Weight"].default_value = 1.0
+        b.inputs["Sheen Weight"].default_value = 0.25 if CL == "rainbow" else 0.8
     b.inputs["Specular IOR Level"].default_value = 0.8
 set_mat(cloth, mc)
 
@@ -99,10 +116,16 @@ for f in range(1, nframes + 1):
         if mz < top_obj + 0.02:
             contact = f
 if contact:
-    events.append([contact, "thud", 0.4])
-events.append([min(nframes - 20, (contact or 60) + 70), "ding", 0.6])
+    events.append([contact, "thud", 0.5])
+    events.append([contact, "pop", 0.6, 0])
+    events.append([contact + 2, "sparkle", 0.7])
+    # soft rising marimba arpeggio while the cloth drapes, panned left -> right
+    for k in range(8):
+        events.append([contact + 6 + k * 7, "pluck", 0.55, k, -0.7 + 1.4 * k / 7])
+end = min(nframes - 30, (contact or 60) + 70)
+events.append([end, "chord", 0.9])
 
-camera((0.0, -9.0, 4.4), (0, 0, 1.75), lens=50)
-caption = random.choice(["So smooth", "Silky satisfying", "Wait for it...", ""])
+camera((0.0, -9.0, 4.4), (0, 0, 1.6), lens=60)
+caption = random.choice(["So smooth", "Silky satisfying", "Wait for it...", "Rainbow drape" if CL == "rainbow" else "So silky"])
 finish(out, events, nframes, res, spp, static_until=LEAD,
        meta={"concept": "cloth", "obj": OBJ, "cloth": CL, "bg": BG, "caption": caption, "root": 220.0})

@@ -18,8 +18,25 @@ PASTELS = {
     "sage":   ((0.55, 0.70, 0.52), (0.80, 0.88, 0.76)),
     "sand":   ((0.85, 0.72, 0.56), (0.95, 0.88, 0.78)),
 }
-RAINBOW = [(0.95, 0.30, 0.35), (0.98, 0.58, 0.25), (0.99, 0.82, 0.30), (0.45, 0.82, 0.45),
-           (0.30, 0.70, 0.92), (0.45, 0.45, 0.92), (0.75, 0.45, 0.90), (0.95, 0.45, 0.70)]
+# Saturated "candy" rainbow (feedback 18/11: more colours)
+RAINBOW = [(1.00, 0.18, 0.33), (1.00, 0.48, 0.10), (1.00, 0.80, 0.08), (0.62, 0.90, 0.10), (0.10, 0.82, 0.45),
+           (0.05, 0.80, 0.85), (0.12, 0.52, 1.00), (0.38, 0.30, 1.00), (0.70, 0.25, 1.00), (1.00, 0.25, 0.75)]
+# Vivid backdrops (dark, light) – colourful but light enough that the candy objects still pop
+VIVID = {
+    "bubblegum": ((1.00, 0.45, 0.70), (1.00, 0.70, 0.85)),
+    "electric":  ((0.25, 0.55, 1.00), (0.55, 0.78, 1.00)),
+    "lime":      ((0.55, 0.88, 0.30), (0.80, 0.97, 0.55)),
+    "sunny":     ((1.00, 0.78, 0.20), (1.00, 0.90, 0.50)),
+    "violet":    ((0.55, 0.40, 1.00), (0.76, 0.66, 1.00)),
+    "coral":     ((1.00, 0.50, 0.40), (1.00, 0.72, 0.62)),
+    "aqua":      ((0.20, 0.85, 0.85), (0.55, 0.95, 0.92)),
+}
+PASTELS.update(VIVID)
+
+
+def pick_bg():
+    """Backdrop colour: mostly vivid, sometimes a classic pastel."""
+    return random.choice(list(VIVID) * 3 + ["peach", "mint", "lilac", "sky", "rose"])
 
 
 def srgb_to_lin(c):
@@ -145,7 +162,9 @@ def studio(color_key="peach", strength=1.0, wall_y=4.0, lights=True):
     bd = mesh_from_bm("backdrop", build)
     for p in bd.data.polygons:
         p.use_smooth = True
-    m = plastic("backdrop", light, rough=0.9, coat=0.0)
+    # with the "Standard" view transform the light tint blows out to cream: use the saturated tone
+    bcol = dark if os.environ.get("VIEW", "Standard") == "Standard" else light
+    m = plastic("backdrop", bcol, rough=0.9, coat=0.0)
     set_mat(bd, m)
     scn = bpy.context.scene
     world = bpy.data.worlds.new("w"); scn.world = world; world.use_nodes = True
@@ -168,8 +187,17 @@ def area(name, loc, energy, size, tgt=(0, 0, 1.0)):
     return ob
 
 
-def camera(loc, tgt, lens=50):
+def camera(loc, tgt, lens=50, push=None):
+    """push: slow push-in factor over the clip (lens * push at the last frame) – keeps the frame alive."""
     cd = bpy.data.cameras.new("cam"); cd.lens = lens
+    push = float(os.environ.get("PUSH", 1.06)) if push is None else push
+    if push != 1.0:
+        scn = bpy.context.scene
+        cd.keyframe_insert("lens", frame=1)
+        cd.lens = lens * push; cd.keyframe_insert("lens", frame=scn.frame_end); cd.lens = lens
+        for fc in (cd.animation_data.action.fcurves if hasattr(cd.animation_data.action, "fcurves") else []):
+            for kp in fc.keyframe_points:
+                kp.interpolation = "SINE"
     cam = link(bpy.data.objects.new("cam", cd))
     cam.location = loc
     cam.rotation_euler = (Vector(tgt) - Vector(loc)).to_track_quat("-Z", "Y").to_euler()
@@ -237,7 +265,14 @@ def render_settings(res_scale=0.4, samples=10):
     scn.cycles.transmission_bounces = 4
     r.use_persistent_data = True
     r.resolution_x, r.resolution_y, r.resolution_percentage = 1080, 1920, int(res_scale * 100)
-    scn.view_settings.view_transform = "AgX"; scn.view_settings.look = "AgX - Medium High Contrast"
+    # feedback 18/11: vivid colours. AgX desaturates bright saturated plastics, "Standard" keeps the candy colours.
+    vt = os.environ.get("VIEW", "Standard")
+    scn.view_settings.view_transform = vt
+    scn.view_settings.exposure = float(os.environ.get("EXPOSURE", -0.5 if vt == "Standard" else 0.0))
+    try:
+        scn.view_settings.look = os.environ.get("LOOK", "Medium High Contrast" if vt == "Standard" else "AgX - Punchy")
+    except Exception:
+        pass
     r.image_settings.file_format = "JPEG"; r.image_settings.quality = 92
 
 

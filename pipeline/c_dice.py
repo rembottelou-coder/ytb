@@ -14,7 +14,7 @@ res = float(sys.argv[3]) if len(sys.argv) > 3 else 0.4
 spp = int(sys.argv[4]) if len(sys.argv) > 4 else 10
 random.seed(seed)
 G = int(os.environ.get("GRID", random.choice([3, 4, 4])))
-BG = os.environ.get("BG", random.choice(list(PASTELS)))
+BG = os.environ.get("BG", pick_bg())
 FACES = os.environ.get("FACES", random.choice(["six", "random", "count"]))
 
 S = 0.5            # die size
@@ -111,7 +111,9 @@ for k, (i, j) in enumerate(slots):
     set_interp(d, "LINEAR")
     events.append([fl, "clack", 0.8, k % 5])
     events.append([fl, "pluck", 0.7, k])
-events.append([events[-1][0] + 6, "ding", 1.0])
+last = max(e[0] for e in events)
+events.append([last + 6, "chord", 1.0])
+events.append([last + 8, "sparkle", 0.8])
 
 camera((2.4, -4.4, 6.2), (0, 0.1, 0.25), lens=48 if G == 4 else 56)
 caption = {"six": "Only sixes", "count": "1, 2, 3, 4, 5, 6...", "random": random.choice(["Perfect fit", "Fill the tray"])}[FACES]

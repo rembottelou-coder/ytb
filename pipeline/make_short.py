@@ -46,6 +46,15 @@ for j in sorted(glob.glob(os.path.join(ROOT, "shorts", "s*.json")), key=lambda q
 concept = os.environ.get("CONCEPT")
 if not concept:
     cands = [c for c in ALL if c not in hist] or ALL
+    # prefer the concepts used least often overall (user request), then weighted random among them
+    uses = {c: 0 for c in ALL}
+    for j in glob.glob(os.path.join(ROOT, "shorts", "s*.json")):
+        try:
+            uses[json.load(open(j)).get("concept")] += 1
+        except Exception:
+            pass
+    low = min(uses[c] for c in cands)
+    cands = [c for c in cands if uses[c] == low]
     concept = rng.choices(cands, weights=[WEIGHTS[c] for c in cands])[0]
 print("concept", concept, "history", hist, flush=True)
 
@@ -113,7 +122,7 @@ else:
                             "The most satisfying domino spiral 🌀 #shorts"])
         desc = f"{meta['n']} rainbow dominoes in a {meta['path']} — 3D physics chain reaction.\n\n"
     elif concept == "cloth":
-        cl = {"gold": "Gold", "silver": "Silver", "silk": "Silk"}[meta["cloth"]]
+        cl = {"gold": "Gold", "silver": "Silver", "silk": "Silk", "rainbow": "Rainbow"}[meta["cloth"]]
         title = rng.choice([f"{cl} cloth vs {meta['obj']} ✨ #satisfying #clothsimulation #shorts",
                             f"Slow-motion {cl.lower()} cloth wrapping a {meta['obj']} 😍 #satisfying #shorts",
                             f"So smooth… {cl.lower()} cloth simulation ✨ #shorts"])

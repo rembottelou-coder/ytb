@@ -12,7 +12,7 @@ seed = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 res = float(sys.argv[3]) if len(sys.argv) > 3 else 0.4
 spp = int(sys.argv[4]) if len(sys.argv) > 4 else 10
 random.seed(seed)
-BG = os.environ.get("BG", random.choice(list(PASTELS)))
+BG = os.environ.get("BG", pick_bg())
 BLOCK = os.environ.get("BLOCK", random.choice(["wood", "white", "dark"]))
 
 LEAD, INT = 15, 26
@@ -124,7 +124,11 @@ for n, k in enumerate(order):
     set_interp(p, "LINEAR")
     events.append([f0 + 3, "whoosh_short", 0.4])
     events.append([land, "thock", 0.8, n])
-events.append([events[-1][0] + 5, "ding", 1.0])
+    events.append([land, "pluck", 0.6, 2 * n])            # rising melody, one note per piece
+    events.append([land + 3, "pop", 0.45, n])              # tiny "suction" pop as it seats flush
+last = max(e[0] for e in events)
+events.append([last + 3, "chord", 1.0])
+events.append([last + 5, "sparkle", 0.8])
 
 camera((2.0, -6.6, 8.2), (0, 0.05, 0.3), lens=42)
 caption = random.choice(["Every shape fits", "Shape sorter", "Perfect fit", "Wait for the last one"])

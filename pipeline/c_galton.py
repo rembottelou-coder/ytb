@@ -12,7 +12,7 @@ seed = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 res = float(sys.argv[3]) if len(sys.argv) > 3 else 0.4
 spp = int(sys.argv[4]) if len(sys.argv) > 4 else 10
 random.seed(seed)
-BG = os.environ.get("BG", random.choice(list(PASTELS)))
+BG = os.environ.get("BG", pick_bg())
 NB = int(os.environ.get("NB", 150))
 LEAD = 12
 ROWS = 10
@@ -99,7 +99,7 @@ for i in range(NB):
     set_interp(b, "LINEAR")
     if i % 4 == 0:
         events.append([f, "click", 0.25 + 0.2 * random.random()])
-events.append([f + 8, "ding", 1.0])
+events.append([f + 8, "chord", 1.0])
 print("bins", counts)
 
 camera((0.0, -8.6, 2.3), (0, 0, 2.2), lens=50)
