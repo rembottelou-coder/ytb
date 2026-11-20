@@ -6,12 +6,18 @@ signed in inside the Claude desktop app's built-in browser (account of the chann
 ## Concepts
 `make_short.py` picks a concept that none of the last 6 Shorts (2 days) used — every Short of a day must be a different concept and scene (force with `CONCEPT=`):
 fit, soft (3-clip "Angle" / "% SOFT" formats) and single-clip scenes `c_nest.py`, `c_dice.py`,
-`c_shapes.py`, `c_domino.py`, `c_cloth.py`, `c_galton.py` (helpers in `common.py`, sounds in `sfx.py`,
+`c_shapes.py`, `c_domino.py`, `c_cloth.py`, `c_galton.py`, `c_pendulum.py` (rainbow pendulum wave, marimba note per swing),
+`c_sort.py` (ball-sort puzzle in glass tubes; added 20/11 for more variety) (helpers in `common.py`, sounds in `sfx.py`,
 composited by `compose_generic.py` with SFX synced to `events.json`). Quick preview of any scene:
 `STEP=30 python3 pipeline/c_dice.py /tmp/x 1 0.2 4` renders every 30th frame at low quality.
 
 ## User feedback (keep applying every day)
 - 17/11: "à chaque fois ce sont toujours les mêmes vidéos, varie vraiment" → 3 different concepts per day, none from the previous 6 Shorts, titles never repeated.
+- 20/11 (variety): with 8 concepts the "not in the last 6" rule left only fit/soft (old look) every other day, so two new
+  concepts were added (pendulum, sort). Adding a new `c_<name>.py` scene is the best way to keep things fresh: register it in
+  `make_short.py` (ALL, WEIGHTS, title/desc block); never-used concepts are picked first automatically.
+  Glass tip: refractive glass renders black/dark at our bounce counts — use transparent+fresnel gloss and
+  `ob.visible_glossy = ob.visible_shadow = False` (see `c_sort.py`).
 - 18/11: "plus de couleurs, insister sur les bruitages satisfaisants, des trucs qui changent de ceux d'aujourd'hui, le but c'est vraiment *satisfaisant*, que ça stimule la tête".
   What the pipeline now does for this (concept scenes `c_*.py` + `compose_generic.py`):
   - colours: saturated candy `RAINBOW` (10 hues), vivid backdrops (`VIVID` / `pick_bg()`), "Standard" view transform

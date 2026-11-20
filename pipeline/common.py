@@ -262,7 +262,8 @@ def render_settings(res_scale=0.4, samples=10):
     scn.cycles.samples = samples; scn.cycles.use_denoising = True; scn.cycles.denoiser = "OPENIMAGEDENOISE"
     scn.cycles.use_adaptive_sampling = True; scn.cycles.adaptive_threshold = 0.04
     scn.cycles.max_bounces = 5; scn.cycles.glossy_bounces = 3; scn.cycles.diffuse_bounces = 2
-    scn.cycles.transmission_bounces = 4
+    scn.cycles.transmission_bounces = int(os.environ.get("TBOUNCES", 4))
+    scn.cycles.max_bounces = max(5, scn.cycles.transmission_bounces)
     r.use_persistent_data = True
     r.resolution_x, r.resolution_y, r.resolution_percentage = 1080, 1920, int(res_scale * 100)
     # feedback 18/11: vivid colours. AgX desaturates bright saturated plastics, "Standard" keeps the candy colours.

@@ -12,6 +12,8 @@ Concepts (picked so that none of the last 6 Shorts' concepts repeats (= the last
   domino  rainbow domino spiral / wave chain reaction
   cloth   gold / silver / silk cloth draping over an object in slow motion
   galton  bell-curve machine (balls through pegs into bins)
+  pendulum rainbow pendulum wave (snakes / splits, all line up again at the end, marimba notes)
+  sort    ball-sort puzzle solved in 3D (candy balls hop between glass tubes until each is one colour)
 """
 import os, sys, json, random, subprocess, glob, shutil
 
@@ -35,8 +37,8 @@ if not os.environ.get("IDX"):
 idx = int(os.environ.get("IDX", len(existing) + 1))
 name = "s%02d" % idx
 rng = random.Random(idx * 7919)
-ALL = ["fit", "soft", "nest", "dice", "shapes", "domino", "cloth", "galton"]
-WEIGHTS = {"fit": 1, "soft": 1, "nest": 1.2, "dice": 1.2, "shapes": 1.1, "domino": 1.1, "cloth": 1, "galton": 1}
+ALL = ["fit", "soft", "nest", "dice", "shapes", "domino", "cloth", "galton", "pendulum", "sort"]
+WEIGHTS = {"fit": 1, "soft": 1, "nest": 1.2, "dice": 1.2, "shapes": 1.1, "domino": 1.1, "cloth": 1, "galton": 1, "pendulum": 1.2, "sort": 1.2}
 hist = []
 for j in sorted(glob.glob(os.path.join(ROOT, "shorts", "s*.json")), key=lambda q: int(os.path.basename(q)[1:-5]))[-6:]:
     try:
@@ -127,6 +129,18 @@ else:
                             f"Slow-motion {cl.lower()} cloth wrapping a {meta['obj']} 😍 #satisfying #shorts",
                             f"So smooth… {cl.lower()} cloth simulation ✨ #shorts"])
         desc = f"A {cl.lower()} cloth falls in slow motion and wraps a glossy {meta['obj']}. 3D cloth simulation.\n\n"
+    elif concept == "pendulum":
+        title = rng.choice([f"{meta['n']} balls, one perfect wave 🌈 #satisfying #physics #shorts",
+                            "Wait for them to line up again… 😮‍💨 #satisfying #shorts",
+                            "Pendulum wave hypnosis 🌀 #satisfying #physics #shorts"])
+        desc = (f"{meta['n']} rainbow pendulums with tuned lengths drift into snakes, splits and swirls, "
+                f"then line up perfectly again after {meta['cycle']:.0f} s. Every ball plays a note. 3D animation.\n\n")
+    elif concept == "sort":
+        title = rng.choice([f"Ball sort solved in {meta['moves']} moves 🧪 #satisfying #shorts",
+                            "Every ball back to its colour 🌈 #satisfying #shorts",
+                            "The most satisfying ball sort puzzle 🧪 #oddlysatisfying #shorts"])
+        desc = (f"{meta['colors']} colours, {meta['colors'] + 2} glass tubes, {meta['moves']} moves — "
+                "every candy ball hops home until each tube is one colour. 3D animation.\n\n")
     else:  # galton
         title = rng.choice(["The bell curve machine never fails 🎯 #satisfying #physics #shorts",
                             f"{meta['balls']} balls, one perfect bell curve 📈 #satisfying #shorts",
