@@ -1,4 +1,4 @@
 pipeline/shorts/
 pipeline/work/
-pipeline/run.log
+pipeline/run*.log
 __pycache__/
