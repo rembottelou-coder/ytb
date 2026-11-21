@@ -7,7 +7,7 @@ signed in inside the Claude desktop app's built-in browser (account of the chann
 `make_short.py` picks a concept that none of the last 6 Shorts (2 days) used — every Short of a day must be a different concept and scene (force with `CONCEPT=`):
 fit, soft (3-clip "Angle" / "% SOFT" formats) and single-clip scenes `c_nest.py`, `c_dice.py`,
 `c_shapes.py`, `c_domino.py`, `c_cloth.py`, `c_galton.py`, `c_pendulum.py` (rainbow pendulum wave, marimba note per swing),
-`c_sort.py` (ball-sort puzzle in glass tubes; added 20/11 for more variety) (helpers in `common.py`, sounds in `sfx.py`,
+`c_sort.py` (ball-sort puzzle in glass tubes; added 20/11 for more variety), `c_xylo.py` (rainbow xylophone staircase, balls bounce down playing notes; added 21/11) (helpers in `common.py`, sounds in `sfx.py`,
 composited by `compose_generic.py` with SFX synced to `events.json`). Quick preview of any scene:
 `STEP=30 python3 pipeline/c_dice.py /tmp/x 1 0.2 4` renders every 30th frame at low quality.
 
