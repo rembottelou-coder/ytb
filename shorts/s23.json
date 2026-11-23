@@ -1,0 +1,21 @@
+{
+ "name": "s23",
+ "concept": "galton",
+ "title": "Pure chaos becomes a perfect curve 🤯📈 #satisfying #shorts",
+ "description": "150 balls bounce through a peg board and stack into a bell curve. 3D animation.\n\nSubscribe to @SatisFit3D for more satisfying 3D simulations!\n#satisfying #oddlysatisfying #3danimation #physics #asmr #shorts",
+ "bg": "coral",
+ "balls": 150,
+ "bins": [
+  0,
+  1,
+  10,
+  18,
+  32,
+  41,
+  23,
+  19,
+  5,
+  1,
+  0
+ ]
+}
