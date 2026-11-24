@@ -205,6 +205,46 @@ def camera(loc, tgt, lens=50, push=None):
     return cam
 
 
+def multi_camera(shots, push=None):
+    """Camera cuts (added 24/11: same action seen from several angles, like the big satisfying channels).
+    shots: [(start_frame, loc, tgt, lens), ...] sorted by start_frame; each camera slowly pushes in over its own shot.
+    Cuts are timeline markers bound to cameras (honoured by the animation render)."""
+    scn = bpy.context.scene
+    push = float(os.environ.get("PUSH", 1.06)) if push is None else push
+    cams = []
+    for k, (f0, loc, tgt, lens) in enumerate(shots):
+        f1 = shots[k + 1][0] - 1 if k + 1 < len(shots) else scn.frame_end
+        cd = bpy.data.cameras.new(f"cam{k}"); cd.lens = lens
+        if push != 1.0:
+            cd.keyframe_insert("lens", frame=f0)
+            cd.lens = lens * push; cd.keyframe_insert("lens", frame=max(f1, f0 + 1)); cd.lens = lens
+        cam = link(bpy.data.objects.new(f"cam{k}", cd))
+        cam.location = loc
+        cam.rotation_euler = (Vector(tgt) - Vector(loc)).to_track_quat("-Z", "Y").to_euler()
+        mk = scn.timeline_markers.new(f"shot{k}", frame=max(1, f0))
+        mk.camera = cam
+        cams.append(cam)
+    scn.camera = cams[0]
+    return cams
+
+
+def display_glass(name="dglass", tint=(0.93, 0.97, 1.0), gloss=0.3):
+    """'Display glass': transparent + fresnel gloss. Refractive glass renders dark at our bounce counts.
+    Also set ob.visible_glossy = ob.visible_shadow = False on objects using it."""
+    gl = bpy.data.materials.new(name); gl.use_nodes = True
+    nt = gl.node_tree; nt.nodes.clear()
+    o = nt.nodes.new("ShaderNodeOutputMaterial"); mx = nt.nodes.new("ShaderNodeMixShader")
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent"); tr.inputs["Color"].default_value = (*tint, 1)
+    gs = nt.nodes.new("ShaderNodeBsdfGlossy"); gs.inputs["Roughness"].default_value = 0.04
+    fr = nt.nodes.new("ShaderNodeLayerWeight"); fr.inputs["Blend"].default_value = 0.12
+    ad = nt.nodes.new("ShaderNodeMath"); ad.operation = "MULTIPLY_ADD"; ad.inputs[1].default_value = gloss
+    ad.inputs[2].default_value = 0.02; ad.use_clamp = True
+    nt.links.new(fr.outputs["Fresnel"], ad.inputs[0]); nt.links.new(ad.outputs[0], mx.inputs[0])
+    nt.links.new(tr.outputs[0], mx.inputs[1]); nt.links.new(gs.outputs[0], mx.inputs[2])
+    nt.links.new(mx.outputs[0], o.inputs["Surface"])
+    return gl
+
+
 def key_loc(ob, frame, loc, interp="LINEAR"):
     ob.location = loc
     ob.keyframe_insert("location", frame=frame)

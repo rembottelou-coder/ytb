@@ -15,6 +15,8 @@ Concepts (picked so that none of the last 6 Shorts' concepts repeats (= the last
   pendulum rainbow pendulum wave (snakes / splits, all line up again at the end, marimba notes)
   sort    ball-sort puzzle solved in 3D (candy balls hop between glass tubes until each is one colour)
   xylo    rainbow xylophone staircase: balls bounce down the bars, every hit plays a note, all end in a gold tray
+  boxfill rainbow ball rain filling a glass box / hexagon / jar in layers, MULTI-ANGLE (wide, top-down, close-up)  [24/11]
+  funnel  striped balls spiral down a gravity-well funnel and stack into a glass tube, MULTI-ANGLE  [24/11]
 """
 import os, sys, json, random, subprocess, glob, shutil
 
@@ -38,8 +40,8 @@ if not os.environ.get("IDX"):
 idx = int(os.environ.get("IDX", len(existing) + 1))
 name = "s%02d" % idx
 rng = random.Random(idx * 7919)
-ALL = ["fit", "soft", "nest", "dice", "shapes", "domino", "cloth", "galton", "pendulum", "sort", "xylo"]
-WEIGHTS = {"fit": 1, "soft": 1, "nest": 1.2, "dice": 1.2, "shapes": 1.1, "domino": 1.1, "cloth": 1, "galton": 1, "pendulum": 1.2, "sort": 1.2, "xylo": 1.2}
+ALL = ["fit", "soft", "nest", "dice", "shapes", "domino", "cloth", "galton", "pendulum", "sort", "xylo", "boxfill", "funnel"]
+WEIGHTS = {"fit": 1, "soft": 1, "nest": 1.2, "dice": 1.2, "shapes": 1.1, "domino": 1.1, "cloth": 1, "galton": 1, "pendulum": 1.2, "sort": 1.2, "xylo": 1.2, "boxfill": 1.4, "funnel": 1.4}
 hist = []
 for j in sorted(glob.glob(os.path.join(ROOT, "shorts", "s*.json")), key=lambda q: int(os.path.basename(q)[1:-5]))[-6:]:
     try:
@@ -148,6 +150,24 @@ else:
                             "Rainbow xylophone stairs… turn the sound ON 🔊 #satisfying #shorts"])
         desc = (f"{meta['balls']} candy balls bounce down {meta['bars']} rainbow xylophone bars — every hit plays its note, "
                 "the melodies overlap, and each ball lands in its slot. 3D animation with sound.\n\n")
+    elif concept == "boxfill":
+        what = {"box": "glass box", "hex": "hexagon jar", "jar": "glass jar"}[meta["shape"]]
+        if meta["mode"] == "bands":
+            title = rng.choice([f"{meta['n']} balls fill a {what} in rainbow layers 🌈 #satisfying #shorts",
+                                f"Rainbow ball rain from every angle 🌈📦 #satisfying #shorts",
+                                f"Filling a {what} to the brim… 😮‍💨🌈 #satisfying #asmr #shorts"])
+        else:
+            title = rng.choice([f"{meta['n']} candy balls vs one {what} 🍬 #satisfying #shorts",
+                                f"Candy ball rain fills the {what} 🍬📦 #satisfying #asmr #shorts",
+                                "Watch it fill up… from every angle 👀 #satisfying #shorts"])
+        desc = (f"{meta['n']} glossy candy balls rain into a {what} and fill it to the brim — seen from above, "
+                "from the side and up close through the glass. 3D physics simulation with sound.\n\n")
+    elif concept == "funnel":
+        title = rng.choice([f"{meta['n']} balls spiral down the funnel 🌀🌈 #satisfying #shorts",
+                            "Round and round… into the tube 🌀 #satisfying #asmr #shorts",
+                            "The most hypnotic coin-funnel ever 🌀😵‍💫 #satisfying #shorts"])
+        desc = (f"{meta['n']} striped candy balls roll round and round a gravity-well funnel, faster and faster, "
+                "then drop one by one into a glass tube that ends up perfectly full. 3D animation.\n\n")
     else:  # galton
         title = rng.choice(["The bell curve machine never fails 🎯 #satisfying #physics #shorts",
                             f"{meta['balls']} balls, one perfect bell curve 📈 #satisfying #shorts",
@@ -156,6 +176,21 @@ else:
     meta = {k: v for k, v in meta.items() if k not in ("caption",)}
     meta.pop("concept", None)
 
+# never reuse a title (user feedback 17/11): fall back to generic variants if the picked one already exists
+prev_titles = set()
+for j in glob.glob(os.path.join(ROOT, "shorts", "s*.json")):
+    if os.path.basename(j) != name + ".json":
+        try:
+            prev_titles.add(json.load(open(j))["title"])
+        except Exception:
+            pass
+if title in prev_titles:
+    for alt in ["Wait for the ending 😮‍💨 #satisfying #shorts", "Turn the sound ON 🔊✨ #satisfying #asmr #shorts",
+                "Your brain will love this 🧠✨ #satisfying #shorts", "Watch till the end 👀🌈 #satisfying #shorts",
+                f"Satisfying 3D {concept} #{idx} ✨ #shorts"]:
+        if alt not in prev_titles:
+            title = alt
+            break
 desc += "Subscribe to @SatisFit3D for more satisfying 3D simulations!\n#satisfying #oddlysatisfying #3danimation #physics #asmr #shorts"
 shutil.copy(os.path.join(sd, "final.mp4"), os.path.join(ROOT, "shorts", name + ".mp4"))
 json.dump(dict(name=name, concept=concept, title=title, description=desc, **meta),
