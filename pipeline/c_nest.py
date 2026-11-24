@@ -81,7 +81,11 @@ for i, (ob, apo, h) in enumerate(boxes):
     set_interp(ob, "LINEAR")
     events.append([fl, "whoosh_short", 0.5])
     events.append([land, "thock", 0.5 + 0.5 * i / N, i])   # 4th field = pitch step
-events.append([events[-1][0] + 4, "chord", 1.0])
+    events.append([land, "pluck", 0.55 + 0.3 * i / N, i])  # rising melody on every landing (18/11 feedback)
+    events.append([land + 1, "pop", 0.35, i])
+_end = events[-1][0] + 3
+events.append([_end, "chord", 1.0])
+events.append([_end + 2, "sparkle", 0.8])
 
 cam_h = 7.6
 camera((3.7, -5.6, 6.6), (0, 0, 0.75), lens=44)
