@@ -24,6 +24,23 @@ while _fs > 48 and ImageDraw.Draw(Image.new("RGB", (8, 8))).textlength(caption, 
 sfx.seed(len(caption) + ev["nframes"])
 
 frames = sorted(glob.glob(os.path.join(cd, "f_*.jpg")))
+# ---- retention (26/11, Studio data: Shorts that open on a frozen frame get swiped by ~75 % of viewers) ----
+# 1) hook: drop the frozen lead-in copies and start a few frames before the first sound/action;
+# 2) tail: stop ~1.2 s after the last event (finale) instead of lingering;
+# 3) loop: crossfade the last frames into the first one so the Shorts player loops seamlessly (rewatches).
+if os.environ.get("TRIM", "1") == "1" and not ev.get("meta", {}).get("no_trim") and ev["events"]:
+    first_b = open(frames[0], "rb").read()
+    nstatic = 1
+    while nstatic < len(frames) and os.path.getsize(frames[nstatic]) == len(first_b) and open(frames[nstatic], "rb").read() == first_b:
+        nstatic += 1
+    evf = sorted(int(e[0]) for e in ev["events"])
+    s0 = max(nstatic - 1, evf[0] - 1 - int(os.environ.get("HOOK_PRE", 8)), 0)
+    s0 = min(s0, max(0, len(frames) - 60))
+    e1 = min(len(frames), evf[-1] - 1 + int(os.environ.get("TAIL", 36)))
+    frames = frames[s0:e1]
+    ev["events"] = [[e[0] - s0] + list(e[1:]) for e in ev["events"] if e[0] - s0 >= 1]
+    print("trim", s0, "->", s0 + len(frames), "static", nstatic, flush=True)
+LOOPF = int(os.environ.get("LOOPF", 8))
 comp = os.path.join(cd, "comp"); os.makedirs(comp, exist_ok=True)
 for f in glob.glob(os.path.join(comp, "*.jpg")):
     os.remove(f)
@@ -35,6 +52,10 @@ for i, fp in enumerate(frames):
         d = ImageDraw.Draw(im)
         tw = d.textlength(caption, font=font)
         d.text(((W - tw) / 2, 150), caption, font=font, fill=(255, 255, 255), stroke_width=6, stroke_fill=(30, 30, 35))
+    if i == 0:
+        first_im = im.copy()
+    elif LOOPF and i >= len(frames) - LOOPF:
+        im = Image.blend(im, first_im, (i - (len(frames) - LOOPF) + 1) / (LOOPF + 1))
     im.save(os.path.join(comp, "c_%05d.jpg" % i), quality=93)
 
 n = len(frames)

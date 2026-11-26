@@ -1,0 +1,123 @@
+{
+ "updated": "2026-11-26",
+ "note": "views = Studio Shorts list; stayed = % 'Ont continué de regarder' (vs swiped) in video analytics",
+ "shorts": {
+  "s29": {
+   "concept": "dice",
+   "views": 1183,
+   "stayed": 21.4
+  },
+  "s28": {
+   "concept": "funnel",
+   "views": 1420,
+   "stayed": 40.2
+  },
+  "s27": {
+   "concept": "boxfill",
+   "views": 1259,
+   "stayed": 23.1
+  },
+  "s26": {
+   "concept": "domino",
+   "views": 1242,
+   "stayed": 31.5
+  },
+  "s25": {
+   "concept": "nest",
+   "views": 1208
+  },
+  "s24": {
+   "concept": "xylo",
+   "views": 2028,
+   "stayed": 39.8
+  },
+  "s23": {
+   "concept": "galton",
+   "views": 26480,
+   "stayed": 55.2
+  },
+  "s22": {
+   "concept": "pendulum",
+   "views": 4044
+  },
+  "s21": {
+   "concept": "sort",
+   "views": 1058
+  },
+  "s20": {
+   "concept": "shapes",
+   "views": 1179
+  },
+  "s19": {
+   "concept": "dice",
+   "views": 3722
+  },
+  "s18": {
+   "concept": "cloth",
+   "views": 1836
+  },
+  "s17": {
+   "concept": "domino",
+   "views": 1361
+  },
+  "s16": {
+   "concept": "xylo",
+   "views": 27484,
+   "stayed": 55.7
+  },
+  "s15": {
+   "concept": "nest",
+   "views": 3171
+  },
+  "s14": {
+   "concept": "galton",
+   "views": 2019
+  },
+  "s13": {
+   "concept": "sort",
+   "views": 1447
+  },
+  "s12": {
+   "concept": "pendulum",
+   "views": 1504
+  },
+  "s11": {
+   "concept": "dice",
+   "views": 8537,
+   "stayed": 41.1
+  },
+  "s10": {
+   "concept": "shapes",
+   "views": 1888
+  },
+  "s09": {
+   "concept": "cloth",
+   "views": 2408
+  },
+  "s08": {
+   "concept": "domino",
+   "views": 1507
+  },
+  "s07": {
+   "concept": "nest",
+   "views": 2050
+  },
+  "s06": {
+   "concept": "galton",
+   "views": 2318
+  },
+  "s05": {
+   "concept": "soft",
+   "views": 1420
+  },
+  "s04": {
+   "concept": "fit",
+   "views": 38368,
+   "stayed": 68.8
+  },
+  "s03": {
+   "concept": "soft",
+   "views": 1385
+  }
+ }
+}

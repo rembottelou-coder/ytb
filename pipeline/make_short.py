@@ -17,6 +17,7 @@ Concepts (picked so that none of the last 6 Shorts' concepts repeats (= the last
   xylo    rainbow xylophone staircase: balls bounce down the bars, every hit plays a note, all end in a gold tray
   boxfill rainbow ball rain filling a glass box / hexagon / jar in layers, MULTI-ANGLE (wide, top-down, close-up)  [24/11]
   funnel  striped balls spiral down a gravity-well funnel and stack into a glass tube, MULTI-ANGLE  [24/11]
+  ring    ball bounces inside spinning neon rings with gaps, note on every bounce, rings pop as it escapes  [26/11]
   tetris  candy tetrominoes glide, rotate and drop into an upright board until it is filled with no gap, rows flash, MULTI-ANGLE  [26/11]
 """
 import os, sys, json, random, subprocess, glob, shutil
@@ -41,8 +42,44 @@ if not os.environ.get("IDX"):
 idx = int(os.environ.get("IDX", len(existing) + 1))
 name = "s%02d" % idx
 rng = random.Random(idx * 7919)
-ALL = ["fit", "soft", "nest", "dice", "shapes", "domino", "cloth", "galton", "pendulum", "sort", "xylo", "boxfill", "funnel", "tetris"]
-WEIGHTS = {"fit": 1, "soft": 1, "nest": 1.2, "dice": 1.2, "shapes": 1.1, "domino": 1.1, "cloth": 1, "galton": 1, "pendulum": 1.2, "sort": 1.2, "xylo": 1.2, "boxfill": 1.4, "funnel": 1.4, "tetris": 1.4}
+# 26/11 retention: the first frame carries a question / challenge (hits: "So close at 5°…", "Every bounce is a note",
+# "Pure chaos becomes a perfect curve", "Every dice lands on SIX"); plain descriptions got swiped away. No emoji (font).
+HOOKS = {
+    "nest": ["Will the last one fit?", "Wait for the smallest one", "Perfect fit?"],
+    "dice": ["Only sixes?", "Will they ALL fit?", "Wait for the last die"],
+    "shapes": ["Will every shape fit?", "Wait for the heart...", "Which one won't fit?"],
+    "domino": ["Will they ALL fall?", "Don't look away...", "Wait for the last one"],
+    "cloth": ["Watch the cloth...", "So smooth...", "Wait for it..."],
+    "galton": ["Chaos... or order?", "Watch the curve appear", "Pure chaos... or not?"],
+    "pendulum": ["Wait for them to line up", "Chaos... then perfect order", "Watch closely..."],
+    "sort": ["Can you solve it faster?", "Every colour goes home", "Wait for the last tube"],
+    "xylo": ["Sound ON", "Every bounce is a note", "Listen to the melody..."],
+    "boxfill": ["Will it fill to the top?", "Can it hold them all?", "Wait till it's full"],
+    "funnel": ["Which colour lands last?", "Round and round...", "Wait for the last one"],
+    "tetris": ["Zero gaps?", "Will the last piece fit?", "Perfect fit?"],
+    "ring": ["Will it escape?", "Every bounce is a note", "Wait for it..."],
+}
+ALL = ["fit", "soft", "nest", "dice", "shapes", "domino", "cloth", "galton", "pendulum", "sort", "xylo", "boxfill", "funnel", "tetris", "ring"]
+WEIGHTS = {"fit": 1, "soft": 1, "nest": 1.2, "dice": 1.2, "shapes": 1.1, "domino": 1.1, "cloth": 1, "galton": 1, "pendulum": 1.2, "sort": 1.2, "xylo": 1.2, "boxfill": 1.4, "funnel": 1.4, "tetris": 1.4, "ring": 1.6}
+def perf_factors():
+    """concept -> multiplier from shorts/stats.json (views + 'stayed' %), clipped to [0.5, 2.5]; unknown -> 1."""
+    import math
+    try:
+        st = json.load(open(os.path.join(ROOT, "shorts", "stats.json")))["shorts"]
+    except Exception:
+        return {}
+    by = {}
+    for v in st.values():
+        if v.get("views"):
+            sc = math.log(v["views"]) + (0.03 * (v["stayed"] - 40) if "stayed" in v else 0.0)
+            by.setdefault(v["concept"], []).append(sc)
+    if not by:
+        return {}
+    allv = [x for xs in by.values() for x in xs]
+    mean = sum(allv) / len(allv)
+    return {c: max(0.5, min(2.5, math.exp(0.6 * (sum(xs) / len(xs) - mean)))) for c, xs in by.items()}
+
+
 hist = []
 for j in sorted(glob.glob(os.path.join(ROOT, "shorts", "s*.json")), key=lambda q: int(os.path.basename(q)[1:-5]))[-6:]:
     try:
@@ -60,8 +97,13 @@ if not concept:
         except Exception:
             pass
     low = min(uses[c] for c in cands)
-    cands = [c for c in cands if uses[c] == low]
-    concept = rng.choices(cands, weights=[WEIGHTS[c] for c in cands])[0]
+    # 26/11: performance-aware. Concepts within 1 use of the least-used stay eligible, weighted by how well the
+    # concept actually did on the channel (shorts/stats.json: geometric-mean views vs channel), so winners come back
+    # more often while never-used / rarely-used concepts still go first.
+    cands = [c for c in cands if uses[c] <= low + 1]
+    perf = perf_factors()
+    concept = rng.choices(cands, weights=[WEIGHTS[c] * perf.get(c, 1.0) * (1.6 if uses[c] == low else 1.0) for c in cands])[0]
+    print("weights", {c: round(WEIGHTS[c] * perf.get(c, 1.0) * (1.6 if uses[c] == low else 1.0), 2) for c in cands}, flush=True)
 print("concept", concept, "history", hist, flush=True)
 
 if concept == "fit":
@@ -104,7 +146,8 @@ else:
     os.makedirs(sd, exist_ok=True)
     subprocess.run(["python3", f"c_{concept}.py", sd, str(seed), os.environ.get("RES", "0.4"), os.environ.get("SAMPLES", "10")], check=True)
     meta = json.load(open(os.path.join(sd, "events.json")))["meta"]
-    subprocess.run(["python3", "compose_generic.py", sd], check=True)
+    hook = rng.choice(HOOKS[concept]) if concept in HOOKS else ""
+    subprocess.run(["python3", "compose_generic.py", sd] + ([hook] if hook else []), check=True)
     if concept == "nest":
         what = {4: "Squares", 6: "Hexagons", 64: "Circles"}[meta["shape"]]
         title = rng.choice([f"{what} inside {what.lower()}… perfect fit 😮‍💨 #satisfying #shorts",
@@ -175,6 +218,12 @@ else:
                             f"Filling a {meta['cols']}x{meta['rows']} board perfectly 🧩✨ #satisfying #asmr #shorts"])
         desc = (f"{meta['n']} glossy candy Tetris pieces glide in, spin and drop into a{'n' if meta['cols'] == 8 else ''} {meta['cols']}x{meta['rows']} board "
                 "until it is filled with not a single gap — then every row lights up. 3D animation with sound.\n\n")
+    elif concept == "ring":
+        title = rng.choice([f"Escape {meta['rings']} rings… every bounce is a note 🎶 #satisfying #asmr #shorts",
+                            f"{meta['bounces']} bounces to freedom 😳🎵 #satisfying #shorts",
+                            "Can the ball escape? Sound ON 🔊 #satisfying #asmr #shorts"])
+        desc = (f"A glossy ball bounces inside {meta['rings']} spinning neon rings — every bounce plays the next note and "
+                "changes its colour. Will it slip through every gap? 3D physics animation with sound.\n\n")
     else:  # galton
         title = rng.choice(["The bell curve machine never fails 🎯 #satisfying #physics #shorts",
                             f"{meta['balls']} balls, one perfect bell curve 📈 #satisfying #shorts",
@@ -183,6 +232,24 @@ else:
     meta = {k: v for k, v in meta.items() if k not in ("caption",)}
     meta.pop("concept", None)
 
+# 26/11: hook-style titles (curiosity / tension / impossible outcome / sound) win on this channel; use them most of the time
+TITLE_HOOKS = {
+    "nest": ["The last one barely fits… 😮‍💨 #satisfying #shorts", "Wait for the tiniest one 🤏😳 #satisfying #shorts"],
+    "dice": ["They ALL land perfectly?! 🎲🤯 #satisfying #shorts", "Not a single die missed 🎲😳 #satisfying #shorts"],
+    "shapes": ["The heart was the hardest… ❤️😮‍💨 #satisfying #shorts", "Every. Single. Shape. Fits. ✅🤯 #shorts"],
+    "domino": ["I couldn't look away… 🌈😵‍💫 #satisfying #shorts", "Wait for the very last domino 👀 #satisfying #shorts"],
+    "cloth": ["This cloth feels illegal to watch 😍 #satisfying #shorts", "Smoothest thing you'll see today ✨ #satisfying #shorts"],
+    "galton": ["Random chaos… perfect curve?! 🤯📈 #satisfying #shorts", "Math is SO satisfying 🤯 #satisfying #physics #shorts"],
+    "pendulum": ["Watch them line up again… 😮‍💨 #satisfying #physics #shorts", "Chaos… then PERFECT order 🤯 #satisfying #shorts"],
+    "sort": ["Only 1% can solve this fast 🧪🧠 #satisfying #shorts", "My brain needed this 🧪😌 #satisfying #shorts"],
+    "xylo": ["Turn the sound ON 🔊🎶 #satisfying #asmr #shorts", "Every bounce plays a note 🎵🤯 #satisfying #asmr #shorts"],
+    "boxfill": ["Will it fill to the very top? 😳🌈 #satisfying #shorts", "It filled PERFECTLY… 🤯🌈 #satisfying #asmr #shorts"],
+    "funnel": ["Which colour lands last? 🌀👀 #satisfying #shorts", "So hypnotic I watched it 10 times 🌀😵‍💫 #satisfying #shorts"],
+    "tetris": ["Zero gaps. Not one. 🧩🤯 #satisfying #shorts", "The last piece was SO close… 🧩😮‍💨 #satisfying #shorts"],
+    "ring": ["Will it escape? 😳🎶 #satisfying #asmr #shorts", "Every bounce is a note… wait for it 🎵 #satisfying #shorts"],
+}
+if concept in TITLE_HOOKS and rng.random() < 0.65:
+    title = rng.choice(TITLE_HOOKS[concept])
 # never reuse a title (user feedback 17/11): fall back to generic variants if the picked one already exists
 prev_titles = set()
 for j in glob.glob(os.path.join(ROOT, "shorts", "s*.json")):
@@ -192,7 +259,7 @@ for j in glob.glob(os.path.join(ROOT, "shorts", "s*.json")):
         except Exception:
             pass
 if title in prev_titles:
-    for alt in ["Wait for the ending 😮‍💨 #satisfying #shorts", "Turn the sound ON 🔊✨ #satisfying #asmr #shorts",
+    for alt in TITLE_HOOKS.get(concept, []) + ["Wait for the ending 😮‍💨 #satisfying #shorts", "Turn the sound ON 🔊✨ #satisfying #asmr #shorts",
                 "Your brain will love this 🧠✨ #satisfying #shorts", "Watch till the end 👀🌈 #satisfying #shorts",
                 f"Satisfying 3D {concept} #{idx} ✨ #shorts"]:
         if alt not in prev_titles:
