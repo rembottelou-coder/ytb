@@ -17,6 +17,7 @@ Concepts (picked so that none of the last 6 Shorts' concepts repeats (= the last
   xylo    rainbow xylophone staircase: balls bounce down the bars, every hit plays a note, all end in a gold tray
   boxfill rainbow ball rain filling a glass box / hexagon / jar in layers, MULTI-ANGLE (wide, top-down, close-up)  [24/11]
   funnel  striped balls spiral down a gravity-well funnel and stack into a glass tube, MULTI-ANGLE  [24/11]
+  tetris  candy tetrominoes glide, rotate and drop into an upright board until it is filled with no gap, rows flash, MULTI-ANGLE  [26/11]
 """
 import os, sys, json, random, subprocess, glob, shutil
 
@@ -40,8 +41,8 @@ if not os.environ.get("IDX"):
 idx = int(os.environ.get("IDX", len(existing) + 1))
 name = "s%02d" % idx
 rng = random.Random(idx * 7919)
-ALL = ["fit", "soft", "nest", "dice", "shapes", "domino", "cloth", "galton", "pendulum", "sort", "xylo", "boxfill", "funnel"]
-WEIGHTS = {"fit": 1, "soft": 1, "nest": 1.2, "dice": 1.2, "shapes": 1.1, "domino": 1.1, "cloth": 1, "galton": 1, "pendulum": 1.2, "sort": 1.2, "xylo": 1.2, "boxfill": 1.4, "funnel": 1.4}
+ALL = ["fit", "soft", "nest", "dice", "shapes", "domino", "cloth", "galton", "pendulum", "sort", "xylo", "boxfill", "funnel", "tetris"]
+WEIGHTS = {"fit": 1, "soft": 1, "nest": 1.2, "dice": 1.2, "shapes": 1.1, "domino": 1.1, "cloth": 1, "galton": 1, "pendulum": 1.2, "sort": 1.2, "xylo": 1.2, "boxfill": 1.4, "funnel": 1.4, "tetris": 1.4}
 hist = []
 for j in sorted(glob.glob(os.path.join(ROOT, "shorts", "s*.json")), key=lambda q: int(os.path.basename(q)[1:-5]))[-6:]:
     try:
@@ -168,6 +169,12 @@ else:
                             "The most hypnotic coin-funnel ever 🌀😵‍💫 #satisfying #shorts"])
         desc = (f"{meta['n']} striped candy balls roll round and round a gravity-well funnel, faster and faster, "
                 "then drop one by one into a glass tube that ends up perfectly full. 3D animation.\n\n")
+    elif concept == "tetris":
+        title = rng.choice([f"{meta['n']} Tetris pieces, ZERO gaps 🧩🌈 #satisfying #shorts",
+                            "The most satisfying Tetris ever… wait for the last piece 🧩 #satisfying #shorts",
+                            f"Filling a {meta['cols']}x{meta['rows']} board perfectly 🧩✨ #satisfying #asmr #shorts"])
+        desc = (f"{meta['n']} glossy candy Tetris pieces glide in, spin and drop into a {meta['cols']}x{meta['rows']} board "
+                "until it is filled with not a single gap — then every row lights up. 3D animation with sound.\n\n")
     else:  # galton
         title = rng.choice(["The bell curve machine never fails 🎯 #satisfying #physics #shorts",
                             f"{meta['balls']} balls, one perfect bell curve 📈 #satisfying #shorts",

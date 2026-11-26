@@ -9,7 +9,8 @@ fit, soft (3-clip "Angle" / "% SOFT" formats) and single-clip scenes `c_nest.py`
 `c_shapes.py`, `c_domino.py`, `c_cloth.py`, `c_galton.py`, `c_pendulum.py` (rainbow pendulum wave, marimba note per swing),
 `c_sort.py` (ball-sort puzzle in glass tubes; added 20/11 for more variety), `c_xylo.py` (rainbow xylophone staircase, balls bounce down playing notes; added 21/11),
 `c_boxfill.py` (rainbow ball rain filling a glass box / hexagon / jar in layers, multi-angle; added 24/11),
-`c_funnel.py` (striped balls spiral down a gravity-well "coin funnel" into a glass tube, multi-angle; added 24/11) (helpers in `common.py`, sounds in `sfx.py`,
+`c_funnel.py` (striped balls spiral down a gravity-well "coin funnel" into a glass tube, multi-angle; added 24/11),
+`c_tetris.py` (candy tetrominoes glide, spin and drop into an upright board until it is filled with no gap, rows flash bottom→top; random drop-valid tiling, multi-angle; added 26/11) (helpers in `common.py`, sounds in `sfx.py`,
 composited by `compose_generic.py` with SFX synced to `events.json`). Quick preview of any scene:
 `STEP=30 python3 pipeline/c_dice.py /tmp/x 1 0.2 4` renders every 30th frame at low quality.
 
@@ -19,8 +20,7 @@ composited by `compose_generic.py` with SFX synced to `events.json`). Quick prev
   the big satisfying-3D channels (ball rain into a container, coin-vortex funnel) and a **multi-angle** helper
   `multi_camera(shots)` in `common.py` (camera cuts wide → top-down → close-up → wide via timeline markers, a soft whoosh on
   each cut). Keep all existing concepts in rotation. Next ideas for more variety (add one `c_<name>.py` at a time): marble
-  run / tube slide, softbody jelly cubes squeezed through a grid, beads pouring into a heart-shaped mould, Tetris pieces
-  filling a box, balls in a rotating hexagon, kinetic-sand cutting; retrofitting `multi_camera` into dice/shapes/sort.
+  run / tube slide, softbody jelly cubes squeezed through a grid, beads pouring into a heart-shaped mould, (Tetris: done 26/11), balls in a rotating hexagon, kinetic-sand cutting; retrofitting `multi_camera` into dice/shapes/sort.
   Don't use motion blur together with `multi_camera` (black artefacts on the frame after each cut).
 - 17/11: "à chaque fois ce sont toujours les mêmes vidéos, varie vraiment" → 3 different concepts per day, none from the previous 6 Shorts, titles never repeated.
 - 20/11 (variety): with 8 concepts the "not in the last 6" rule left only fit/soft (old look) every other day, so two new
