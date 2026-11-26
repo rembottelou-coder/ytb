@@ -62,10 +62,10 @@ HOOKS = {
 ALL = ["fit", "soft", "nest", "dice", "shapes", "domino", "cloth", "galton", "pendulum", "sort", "xylo", "boxfill", "funnel", "tetris", "ring"]
 WEIGHTS = {"fit": 1, "soft": 1, "nest": 1.2, "dice": 1.2, "shapes": 1.1, "domino": 1.1, "cloth": 1, "galton": 1, "pendulum": 1.2, "sort": 1.2, "xylo": 1.2, "boxfill": 1.4, "funnel": 1.4, "tetris": 1.4, "ring": 1.6}
 def perf_factors():
-    """concept -> multiplier from shorts/stats.json (views + 'stayed' %), clipped to [0.5, 2.5]; unknown -> 1."""
+    """concept -> multiplier from shorts/perf.json (views + 'stayed' %), clipped to [0.5, 2.5]; unknown -> 1."""
     import math
     try:
-        st = json.load(open(os.path.join(ROOT, "shorts", "stats.json")))["shorts"]
+        st = json.load(open(os.path.join(ROOT, "shorts", "perf.json")))["shorts"]
     except Exception:
         return {}
     by = {}
@@ -98,7 +98,7 @@ if not concept:
             pass
     low = min(uses[c] for c in cands)
     # 26/11: performance-aware. Concepts within 1 use of the least-used stay eligible, weighted by how well the
-    # concept actually did on the channel (shorts/stats.json: geometric-mean views vs channel), so winners come back
+    # concept actually did on the channel (shorts/perf.json: geometric-mean views vs channel), so winners come back
     # more often while never-used / rarely-used concepts still go first.
     cands = [c for c in cands if uses[c] <= low + 1]
     perf = perf_factors()
