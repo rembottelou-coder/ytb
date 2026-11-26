@@ -79,13 +79,13 @@ def simulate(rs):
 
 
 best = None
-for attempt in range(400):
+for attempt in range(1500):
     rs = random.Random(seed * 1000 + attempt)
     pos, bounces, escapes, phase = simulate(rs)
     if len(escapes) < K:
         continue
     gaps = [b - a for a, b in zip([0] + escapes[:-1], escapes)]
-    ok = escapes[0] > 1.3 * FPS and escapes[-1] < 11.0 * FPS and min(gaps[1:] or [99]) > 0.9 * FPS and len(bounces) >= 14
+    ok = 1.2 * FPS < escapes[0] < 3.6 * FPS and escapes[-1] < 9.5 * FPS and min(gaps[1:] or [99]) > 0.8 * FPS and len(bounces) >= 14   # punchy: ~10 s max
     if ok:
         best = (pos, bounces, escapes, phase, attempt)
         break
