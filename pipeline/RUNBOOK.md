@@ -10,11 +10,24 @@ fit, soft (3-clip "Angle" / "% SOFT" formats) and single-clip scenes `c_nest.py`
 `c_sort.py` (ball-sort puzzle in glass tubes; added 20/11 for more variety), `c_xylo.py` (rainbow xylophone staircase, balls bounce down playing notes; added 21/11),
 `c_boxfill.py` (rainbow ball rain filling a glass box / hexagon / jar in layers, multi-angle; added 24/11),
 `c_funnel.py` (striped balls spiral down a gravity-well "coin funnel" into a glass tube, multi-angle; added 24/11),
+`c_ring.py` (ball bouncing inside spinning neon rings with gaps, a note + colour change on every bounce, rings pop as it escapes — the viral "will it escape?" format; added 26/11),
 `c_tetris.py` (candy tetrominoes glide, spin and drop into an upright board until it is filled with no gap, rows flash bottom→top; random drop-valid tiling, multi-angle; added 26/11) (helpers in `common.py`, sounds in `sfx.py`,
 composited by `compose_generic.py` with SFX synced to `events.json`). Quick preview of any scene:
 `STEP=30 python3 pipeline/c_dice.py /tmp/x 1 0.2 4` renders every 30th frame at low quality.
 
 ## User feedback (keep applying every day)
+- 26/11: "continue d'améliorer, de varier, faire des trucs qui motivent à rester dessus car ça interpelle et apaise le
+  cerveau… on fait des vues mais pas assez". Studio data (26/11) — views / % "Ont continué de regarder" (vs swiped):
+  fit "So close at 5°…" 38k / 69 %, xylo "Every bounce is a note" 27k / 56 %, galton "Pure chaos becomes a perfect curve"
+  26k / 55 %, dice "Every dice lands on SIX" 8.5k / 41 %; most others ~1–2k with 21–40 % (boxfill 23 %, dice-tray 21 %,
+  domino 31 %). Shorts under ~45 % "stayed" never take off → the FIRST SECOND decides. What the pipeline now does:
+  - `compose_generic.py`: drops the frozen lead-in frames and starts ~8 frames before the first action (TRIM, HOOK_PRE),
+    ends ~1.2 s after the finale (TAIL) and crossfades the last 8 frames into the first one → seamless loop / rewatches;
+  - `make_short.py`: a question / challenge caption burned in from frame 1 (`HOOKS`), hook-style titles 65 % of the time
+    (`TITLE_HOOKS`: tension, impossible outcome, "sound ON"), concepts weighted by real performance (`shorts/perf.json`,
+    `perf_factors()`: fit ×2.5, xylo ×2.2, galton ×1.6 …) while the variety rules (none of the last 6, least-used first) stay;
+  - new concept `ring` (note on every bounce + suspense). fit (best performer) is fine to use with its current look.
+  - Keep refreshing `shorts/perf.json` (step 0 below) so the weighting follows what works.
 - 24/11: "pense à varier, là c'est redondant — ce que tu fais est très bien, garde-le, mais varie : par ex. les boules sous
   différents angles qui rentrent dans une boîte… inspire-toi d'autres chaînes YouTube". Done: two new concepts inspired by
   the big satisfying-3D channels (ball rain into a container, coin-vortex funnel) and a **multi-angle** helper
@@ -37,6 +50,17 @@ composited by `compose_generic.py` with SFX synced to `events.json`). Quick prev
   - motion: slow camera push-in over the clip (`PUSH=1.06`).
   When checking frames, reject a Short that looks pale/pastel or whose sound is only a few weak clicks.
   (fit / soft still use the older `scene.py` / `compose.py` look — upgrade them the same way before using them again.)
+
+## 0. Refresh performance stats (once per daily run, ~1 min, read-only)
+In the built-in browser open `https://studio.youtube.com/channel/UCFs5CBPK9XgrcTTJwGlugGQ/videos/short`, wait ~5 s, run:
+```js
+[...document.querySelectorAll('ytcp-video-row')].map(r => [r.querySelector('#video-title')?.innerText,
+  (r.querySelector('.tablecell-views')?.innerText || '').replace(/\s/g, '')]).filter(x => x[0] && /^\d+$/.test(x[1]))
+```
+save the result as JSON in the scratchpad and run `python3 pipeline/update_perf.py <file>`; commit `shorts/perf.json` with the
+first Short of the day. (Optional: a video's "% Ont continué de regarder" is on
+`studio.youtube.com/video/<id>/analytics/tab-overview/period-default`; add it as a 3rd column.)
+Skip this step if the browser is unreachable.
 
 ## 1. Render the next Short (cloud workspace)
 
