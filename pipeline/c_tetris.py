@@ -230,6 +230,9 @@ shots = [(1, (2.1 * side, -4.7, zc + 2.0), (0, 0, zc + 0.3), 40),
          (s1, (0.9 * side, -2.4, Z0 + 0.35), (0, 0, Z0 + BH * 0.55), 30),
          (s2, (-0.6 * side, -3.6, top + 2.6), (0, 0, zc), 34),
          (s3, (0.0, -5.3, zc + 0.5), (0, 0, zc + 0.12), 44)]
+# wider boards (8 columns): pull every camera back so the frame + posts stay inside the portrait frame
+K = max(1.0, (BW + 0.75) / 2.4)
+shots = [(f, tuple(t[i] + (l[i] - t[i]) * K for i in range(3)), t, ln) for f, l, t, ln in shots]
 multi_camera(shots)
 for f in (s1, s2, s3):
     events.append([f, "whoosh_short", 0.3])

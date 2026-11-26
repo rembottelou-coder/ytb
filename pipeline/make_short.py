@@ -173,7 +173,7 @@ else:
         title = rng.choice([f"{meta['n']} Tetris pieces, ZERO gaps 🧩🌈 #satisfying #shorts",
                             "The most satisfying Tetris ever… wait for the last piece 🧩 #satisfying #shorts",
                             f"Filling a {meta['cols']}x{meta['rows']} board perfectly 🧩✨ #satisfying #asmr #shorts"])
-        desc = (f"{meta['n']} glossy candy Tetris pieces glide in, spin and drop into a {meta['cols']}x{meta['rows']} board "
+        desc = (f"{meta['n']} glossy candy Tetris pieces glide in, spin and drop into a{'n' if meta['cols'] == 8 else ''} {meta['cols']}x{meta['rows']} board "
                 "until it is filled with not a single gap — then every row lights up. 3D animation with sound.\n\n")
     else:  # galton
         title = rng.choice(["The bell curve machine never fails 🎯 #satisfying #physics #shorts",
