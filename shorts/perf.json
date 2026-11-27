@@ -1,60 +1,60 @@
 {
- "updated": "2026-11-26",
+ "updated": "2026-11-27",
  "note": "views = Studio Shorts list; stayed = % 'Ont continué de regarder' (vs swiped) in video analytics",
  "shorts": {
   "s29": {
    "concept": "dice",
-   "views": 1183,
+   "views": 1273,
    "stayed": 21.4
   },
   "s28": {
    "concept": "funnel",
-   "views": 1420,
+   "views": 1552,
    "stayed": 40.2
   },
   "s27": {
    "concept": "boxfill",
-   "views": 1259,
+   "views": 1293,
    "stayed": 23.1
   },
   "s26": {
    "concept": "domino",
-   "views": 1242,
+   "views": 1231,
    "stayed": 31.5
   },
   "s25": {
    "concept": "nest",
-   "views": 1208
+   "views": 1302
   },
   "s24": {
    "concept": "xylo",
-   "views": 2028,
+   "views": 2056,
    "stayed": 39.8
   },
   "s23": {
    "concept": "galton",
-   "views": 26480,
+   "views": 26753,
    "stayed": 55.2
   },
   "s22": {
    "concept": "pendulum",
-   "views": 4044
+   "views": 4191
   },
   "s21": {
    "concept": "sort",
-   "views": 1058
+   "views": 1065
   },
   "s20": {
    "concept": "shapes",
-   "views": 1179
+   "views": 1181
   },
   "s19": {
    "concept": "dice",
-   "views": 3722
+   "views": 3727
   },
   "s18": {
    "concept": "cloth",
-   "views": 1836
+   "views": 1841
   },
   "s17": {
    "concept": "domino",
@@ -62,12 +62,12 @@
   },
   "s16": {
    "concept": "xylo",
-   "views": 27484,
+   "views": 27513,
    "stayed": 55.7
   },
   "s15": {
    "concept": "nest",
-   "views": 3171
+   "views": 3173
   },
   "s14": {
    "concept": "galton",
@@ -75,36 +75,36 @@
   },
   "s13": {
    "concept": "sort",
-   "views": 1447
+   "views": 1449
   },
   "s12": {
    "concept": "pendulum",
-   "views": 1504
+   "views": 1509
   },
   "s11": {
    "concept": "dice",
-   "views": 8537,
+   "views": 8547,
    "stayed": 41.1
   },
   "s10": {
    "concept": "shapes",
-   "views": 1888
+   "views": 1894
   },
   "s09": {
    "concept": "cloth",
-   "views": 2408
+   "views": 2409
   },
   "s08": {
    "concept": "domino",
-   "views": 1507
+   "views": 1508
   },
   "s07": {
    "concept": "nest",
-   "views": 2050
+   "views": 2051
   },
   "s06": {
    "concept": "galton",
-   "views": 2318
+   "views": 2319
   },
   "s05": {
    "concept": "soft",
@@ -112,12 +112,24 @@
   },
   "s04": {
    "concept": "fit",
-   "views": 38368,
+   "views": 38370,
    "stayed": 68.8
   },
   "s03": {
    "concept": "soft",
-   "views": 1385
+   "views": 1386
+  },
+  "s32": {
+   "concept": "sort",
+   "views": 254
+  },
+  "s31": {
+   "concept": "tetris",
+   "views": 4691
+  },
+  "s30": {
+   "concept": "cloth",
+   "views": 1330
   }
  }
 }
